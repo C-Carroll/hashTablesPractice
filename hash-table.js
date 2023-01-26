@@ -9,12 +9,11 @@ class KeyValuePair {
 }
 
 class HashTable {
-  constructor(size, numBuckets = 4) {
+  constructor(numBuckets = 4) {
     this.count = 0;
-    this.capacity = size;
-    this.data = new Array(size);
+    this.capacity = numBuckets;
+    this.data = new Array(this.capacity);
     this.data.fill(null);
-    this.numBuckets = numBuckets;
   }
 
   hash(key) {
@@ -40,21 +39,35 @@ class HashTable {
 
   insertWithHashCollisions(key, value) {
     let hash = this.hashMod(key);
-    if (this.data[hash]) {
-      let curr = this.data[hash];
-
-      while (curr.next) {
-        curr = curr.next;
-      }
-      curr.next = new KeyValuePair(key, value);
-      this.count++;
+    let current = this.data[hash];
+    if (current) {
+      let newNode = new KeyValuePair(key, value);
+      newNode.next = current;
+      this.data[hash] = newNode;
     } else {
       this.data[hash] = new KeyValuePair(key, value);
-      this.count++;
     }
+
+    this.count++;
   }
 
-  insert(key, value) {}
+  insert(key, value) {
+    let index = this.hashMod(key);
+    let curr = this.data[index];
+
+    while (curr) {
+      if (curr.key === key) {
+        curr.value = value;
+        return;
+      }
+      curr = curr.next;
+    }
+
+    let newPair = new KeyValuePair(key, value);
+    newPair.next = this.data[index];
+    this.data[index] = newPair;
+    this.count++;
+  }
 }
 
 module.exports = HashTable;
